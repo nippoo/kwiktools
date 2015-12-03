@@ -35,8 +35,8 @@ def tdtmat2dat(basename, outputdat):
     print("Loading {0} to determine length".format(init))
     try:
         source = scipy.io.loadmat(init)['wavstream'][0]
-    except(IOError, OSError):
-        print("Error opening file {0} ({1}): {2}".format(init, e.errno, e.strerror))
+    except(IOError, OSError) as e:
+        print("Error opening file: {1}".format(e))
         return
 
     # Create new memmapped .dat file
@@ -53,8 +53,8 @@ def tdtmat2dat(basename, outputdat):
     print("Creating destination file {0}".format(outputdat))
     try:
         dest = np.memmap(outputdat, dtype=dtype, mode='r+', shape=(n_samples, n_channels))
-    except(IOError, OSError):
-        print("Error opening file {0} ({1}): {2}".format(outputdat, e.errno, e.strerror))
+    except(IOError, OSError) as e:
+        print("Error opening file: {1}".format(e))
         return
 
     # Now open and convert the source files
@@ -65,8 +65,8 @@ def tdtmat2dat(basename, outputdat):
             source = scipy.io.loadmat(f)['wavstream'][0]
             for j in range(len(source)):
                 dest[(chunk_length * j):(chunk_length * (j + 1)),i] = source[j][:,0]
-        except(IOError, OSError):
-            print("Error opening file {0} ({1}): {2}".format(f, e.errno, e.strerror))
+        except(IOError, OSError) as e:
+            print("Error opening file: {1}".format(e))
             return
 
 
