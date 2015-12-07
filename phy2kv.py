@@ -118,8 +118,8 @@ def convert_to_kv(kwik_file):
         wl_raw.traces = wl_filtered.traces = model._traces
         wl_raw.channels = wl_filtered.channels = model._channel_order
 
-        waveforms_filtered = SpikeLoader(wl_filtered, model.spike_samples)
-        waveforms_raw = SpikeLoader(wl_raw, model.spike_samples)
+        waveforms_filtered = SpikeLoader(wl_filtered, model.spike_samples)[:].astype('int16')
+        waveforms_raw = SpikeLoader(wl_raw, model.spike_samples)[:].astype('int16')
 
         wr = kwx['channel_groups/' + i].\
             require_dataset(name='waveforms_raw',
