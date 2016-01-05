@@ -85,19 +85,27 @@ def convert_to_kv(kwik_file, interval_samples):
         scpath = cgpath + 'spikes/clusters/'
         sc = [kwik[scpath + i] for i in kwik[scpath]]
 
-        wr = kwx[cgpath + 'waveforms_raw']
-        wf = kwx[cgpath + 'waveforms_filtered']
+        try:
+            wr = kwx[cgpath + 'waveforms_raw']
+            wf = kwx[cgpath + 'waveforms_filtered']
+        except KeyError:
+            wr = wf = None
 
         keep_idx, n_discarded = overlapping_spikes(ts, fm, interval_samples)
         newlen = len(fm) - n_discarded
 
+        print("100% complete,",
+              "discarded {0} spikes ({1:.1f}%). n_spikes: {2} -> {3}."
+              .format(n_discarded, 100*n_discarded/len(fm), len(fm), newlen))
+
         for j in ([fm, ts, tf, rec, wr, wf] + sc):
-            print("Resizing {0}".format(j.name))
-            j_name = j.name
-            j_file = j.file
-            newj = j[keep_idx,...]
-            del j_file[j_name]
-            k = j_file.create_dataset(j_name, data=newj)
+            if j:
+                print("Resizing {0}".format(j.name))
+                j_name = j.name
+                j_file = j.file
+                newj = j[keep_idx,...]
+                del j_file[j_name]
+                k = j_file.create_dataset(j_name, data=newj)
 
 if (len(sys.argv) != 3):
     print("Usage: isi_clean.py KWIKPATH INTERVAL_SAMPLES")
