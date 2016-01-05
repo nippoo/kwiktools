@@ -58,7 +58,7 @@ def overlapping_spikes(ts, masks=None, interval=0, mask_min=0):
 
     return keep_idx, n_discarded
 
-def convert_to_kv(kwik_file, interval_samples):
+def convert_to_kv(kwik_file, interval_samples, mask_min):
     '''Converts an input phy-generated .kwik file to be readable by KlustaViewa'''
 
     print("Opening {0}...".format(kwik_file))
@@ -91,7 +91,7 @@ def convert_to_kv(kwik_file, interval_samples):
         except KeyError:
             wr = wf = None
 
-        keep_idx, n_discarded = overlapping_spikes(ts, fm, interval_samples)
+        keep_idx, n_discarded = overlapping_spikes(ts, fm, interval_samples, mask_min)
         newlen = len(fm) - n_discarded
 
         print("100% complete,",
@@ -107,9 +107,9 @@ def convert_to_kv(kwik_file, interval_samples):
                 del j_file[j_name]
                 k = j_file.create_dataset(j_name, data=newj)
 
-if (len(sys.argv) != 3):
-    print("Usage: isi_clean.py KWIKPATH INTERVAL_SAMPLES")
+if (len(sys.argv) != 4):
+    print("Usage: isi_clean.py KWIKPATH INTERVAL_SAMPLES MASK_MIN")
 elif (op.splitext(sys.argv[1])[1] != ".kwik"):
     print("File must end in .kwik and be an HDF5 KWIK-format file")
 else:
-    convert_to_kv(sys.argv[1], int(sys.argv[2]))
+    convert_to_kv(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]))
