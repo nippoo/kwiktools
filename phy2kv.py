@@ -168,7 +168,7 @@ def convert_to_kv(kwik_file):
         app_user(kwik, 'recordings/' + i)
 
 if (len(sys.argv) != 2):
-    print("Usage: tdtmat2dat.py KWIKPATH")
+    print("Usage: phy2kv.py KWIKPATH")
 elif (op.splitext(sys.argv[1])[1] != ".kwik"):
     print("File must end in .kwik and be an HDF5 KWIK-format file")
 else:
