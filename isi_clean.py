@@ -50,7 +50,7 @@ def overlapping_spikes(ts, masks=None, interval=0, mask_min=0, rand_disc=True):
 
             # increment second sample and recalculate difference
             idx1 = idx1 + 1
-            if (idx1 >= len(ts) - 1):
+            if (idx1 >= len(ts)):
                 break
             diff = (int(ts[idx1]) - int(ts[idx0]))
 
