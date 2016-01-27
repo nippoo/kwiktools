@@ -6,13 +6,14 @@
 # Dependencies: h5py, numpy
 # Max Hunter, CortexLab, 2015
 
+from __future__ import division
 import sys
 import os.path as op
 import numpy as np
 import h5py
 import random
 
-def overlapping_spikes(ts, masks=None, interval=0, mask_min=0):
+def overlapping_spikes(ts, masks=None, interval=0, mask_min=0, rand_disc=True):
     keep_idx = np.ones(len(ts), dtype=bool)
     n_discarded = 0
     next_counter = 1000
@@ -31,8 +32,14 @@ def overlapping_spikes(ts, masks=None, interval=0, mask_min=0):
 
     while idx1 < len(ts):
         while is_overlap(idx0, idx1):
-            # pick a random sample to discard
-            if random.choice([True, False]):
+            if rand_disc == True:
+                # pick a random sample to discard
+                ch = random.choice([True, False])
+            else:
+                # always discard first sample
+                ch = True
+
+            if ch:
                 # discard the first sample and use second sample as comparison
                 keep_idx[idx0] = False
                 idx0 = idx1
@@ -58,7 +65,7 @@ def overlapping_spikes(ts, masks=None, interval=0, mask_min=0):
 
     return keep_idx, n_discarded
 
-def convert_to_kv(kwik_file, interval_samples, mask_min):
+def convert_to_kv(kwik_file, interval_samples, mask_min, rand_disc):
     '''Converts an input phy-generated .kwik file to be readable by KlustaViewa'''
 
     print("Opening {0}...".format(kwik_file))
@@ -91,11 +98,13 @@ def convert_to_kv(kwik_file, interval_samples, mask_min):
         except KeyError:
             wr = wf = None
 
-        keep_idx, n_discarded = overlapping_spikes(ts, fm, interval_samples, mask_min)
+        print("Temporal overlap: {0}. Spatial mask overlap: {1}. Randomly discarding spike: {2}"
+              .format(interval_samples, mask_min, ("True" if rand_disc else "False")))
+
+        keep_idx, n_discarded = overlapping_spikes(ts, fm, interval_samples, mask_min, rand_disc)
         newlen = len(fm) - n_discarded
 
-        print("100% complete,",
-              "discarded {0} spikes ({1:.1f}%). n_spikes: {2} -> {3}."
+        print("100% complete, discarded {0} spikes ({1:.1f}%). n_spikes: {2} -> {3}."
               .format(n_discarded, 100*n_discarded/len(fm), len(fm), newlen))
 
         for j in ([fm, ts, tf, rec, wr, wf] + sc):
@@ -107,9 +116,9 @@ def convert_to_kv(kwik_file, interval_samples, mask_min):
                 del j_file[j_name]
                 k = j_file.create_dataset(j_name, data=newj)
 
-if (len(sys.argv) != 4):
-    print("Usage: isi_clean.py KWIKPATH INTERVAL_SAMPLES MASK_MIN")
+if (len(sys.argv) != 5):
+    print("Usage: isi_clean.py KWIKPATH INTERVAL_SAMPLES MASK_MIN RAND_DISC")
 elif (op.splitext(sys.argv[1])[1] != ".kwik"):
     print("File must end in .kwik and be an HDF5 KWIK-format file")
 else:
-    convert_to_kv(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]))
+    convert_to_kv(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]))
